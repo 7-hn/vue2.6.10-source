@@ -15,6 +15,7 @@ const idToTemplate = cached(id => {
 })
 // 保留 Vue 实例的 $mount 方法
 const mount = Vue.prototype.$mount
+// 主要作用是把 template 编译成 render 函数
 Vue.prototype.$mount = function (
   el?: string | Element,
   // 非ssr情况下为 false，ssr 时候为true

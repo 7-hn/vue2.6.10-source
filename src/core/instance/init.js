@@ -17,7 +17,7 @@ export function initMixin (Vue: Class<Component>) {
   // 合并 options / 初始化操作
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
-    // a uid
+    // a uid，唯一标识
     vm._uid = uid++
 
     let startTag, endTag
@@ -32,7 +32,7 @@ export function initMixin (Vue: Class<Component>) {
     // 如果是 Vue 实例不需要被 observe
     vm._isVue = true
     // merge options
-    // 合并 options
+    // 合并 options，用户传入的 options 和 vue构造函数的options合并
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the

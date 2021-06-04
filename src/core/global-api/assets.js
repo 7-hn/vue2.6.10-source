@@ -14,6 +14,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
       id: string,
       definition: Function | Object
     ): Function | Object | void {
+      // 没传定义会之间返回（获取对应方法）
       if (!definition) {
         return this.options[type + 's'][id]
       } else {
@@ -22,6 +23,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
           validateComponentName(id)
         }
         // Vue.component('comp', { template: '' })
+        // 判断是否为组件，并且是原始对象 [object Object]
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id
           // 把组件配置转换为组件的构造函数
