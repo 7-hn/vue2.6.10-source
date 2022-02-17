@@ -32,14 +32,15 @@ export const emptyNode = new VNode('', {}, [])
 
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
+// 判断是否为同一类型节点
 function sameVnode (a, b) {
   return (
-    a.key === b.key && (
+    a.key === b.key && ( // key值是否一样
       (
-        a.tag === b.tag &&
-        a.isComment === b.isComment &&
-        isDef(a.data) === isDef(b.data) &&
-        sameInputType(a, b)
+        a.tag === b.tag && // 标签名是否一样
+        a.isComment === b.isComment && // 是否都为注释节点
+        isDef(a.data) === isDef(b.data) && // 是否都定义了data
+        sameInputType(a, b) // 当标签为input时，type必须是否相同
       ) || (
         isTrue(a.isAsyncPlaceholder) &&
         a.asyncFactory === b.asyncFactory &&
@@ -419,8 +420,8 @@ export function createPatchFunction (backend) {
     let newStartIdx = 0
     let oldEndIdx = oldCh.length - 1
     let oldStartVnode = oldCh[0]
-    let oldEndVnode = oldCh[oldEndIdx] 
-    let newEndIdx = newCh.length - 1 
+    let oldEndVnode = oldCh[oldEndIdx]
+    let newEndIdx = newCh.length - 1
     let newStartVnode = newCh[0]
     let newEndVnode = newCh[newEndIdx]
     let oldKeyToIdx, idxInOld, vnodeToMove, refElm
@@ -433,7 +434,7 @@ export function createPatchFunction (backend) {
     if (process.env.NODE_ENV !== 'production') {
       checkDuplicateKeys(newCh)
     }
-    // diff 算法
+    // diff 算法 - 首尾指针法，深度优先
     // 当新节点和旧节点都没有遍历完成
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
       if (isUndef(oldStartVnode)) {
@@ -471,9 +472,8 @@ export function createPatchFunction (backend) {
       } else {
         // 以上四种情况都不满足
         // newStartNode 依次和旧的节点比较
-        
-        // 从新的节点开头获取一个，去老节点中查找相同节点
-        // 先找新开始节点的key和老节点相同的索引，如果没找到再通过sameVnode找
+        // 把所有旧子节点的 key 做一个映射到旧节点下标的 key -> index 表，
+        // 然后用新 vnode 的 key 去找出在旧节点中可以复用的位置。
         if (isUndef(oldKeyToIdx)) oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
         idxInOld = isDef(newStartVnode.key)
           ? oldKeyToIdx[newStartVnode.key]
@@ -536,6 +536,14 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /**
+   * 找到对应的真实DOM，称为el
+   * 判断newVnode和oldVnode是否指向同一个对象，如果是，那么直接return
+   * 如果他们都有文本节点并且不相等，那么将el的文本节点设置为newVnode的文本节点。
+   * 如果oldVnode有子节点而newVnode没有，则删除el的子节点
+   * 如果oldVnode没有子节点而newVnode有，则将newVnode的子节点真实化之后添加到el
+   * 如果两者都有子节点，则执行updateChildren函数比较子节点，这一步很重要
+   */
   function patchVnode (
     oldVnode,
     vnode,
